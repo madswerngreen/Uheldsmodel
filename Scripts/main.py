@@ -63,7 +63,6 @@ def main():
         "cv_params": df_params
     }
 
-
 if __name__ == "__main__":
     results = main()
     QQ_PLOT_ALL(results["cv_params"], results["cv_predictions"],
