@@ -7,7 +7,7 @@ import os
 # set wd to script location
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-def fit_baseline():
+def baseline():
     """ Fit baseline model without any features for comparison """
     DATA_PATH = "../Data/Model_Input/Uheld_LINKS.csv"
     
@@ -91,8 +91,8 @@ if __name__ == "__main__":
     QQ_PLOT_ALL(results["cv_params"], results["cv_predictions"],
                     path = "../Results/JointModel/Figures")
     
-    #results = fit_baseline()
-    #QQ_PLOT_ALL(results["cv_params"], results["cv_predictions"],
-                    #path = "../Results/Baseline/Figures")
+    results = baseline()
+    QQ_PLOT_ALL(results["cv_params"], results["cv_predictions"],
+                    path = "../Results/Baseline/Figures")
     
     fit_and_save_params()
