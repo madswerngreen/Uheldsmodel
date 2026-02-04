@@ -1,2 +1,13 @@
-/Data
+# Large data (not versioned)
+Data/GMM/
+Data/Uheld/
+
+# Geospatial outputs
+*.gpkg
+
+# Working presentations
 /ENVI Opdatering af uheldsmodel.pptx
+
+# Python cache
+__pycache__/
+*.pyc

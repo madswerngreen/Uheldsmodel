@@ -3,10 +3,9 @@ import numpy as np
 from scipy.special import gammaln, expit
 from scipy.optimize import minimize
 from sklearn.model_selection import KFold
-import seaborn as sns
 import matplotlib.pyplot as plt
 import os
-from numpy.linalg import inv
+#from numpy.linalg import inv
 from tqdm.auto import tqdm
 import statsmodels.api as sm
 import random
@@ -518,7 +517,7 @@ class Model:
             H_post = (-H_ll_pen) + Prec_prior
             # Numerical guard
             # Use pinv to avoid crashes if nearly singular
-            H_post += np.eye(H_post.shape[0]) * 1e-6
+            #H_post += np.eye(H_post.shape[0]) * 1e-6
             H_post_inv = np.linalg.pinv(H_post)
 
             return np.diag(H_post_inv)
