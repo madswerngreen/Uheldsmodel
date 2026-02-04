@@ -1055,7 +1055,7 @@ def QQ_PLOT_ALL(params, pred,
     
     fig, axes = plt.subplots(
         nrows=n_folds, ncols=n_cols,
-        figsize=(3*n_cols, 4*n_folds),
+        figsize=(3*n_cols, 3*n_folds),
         squeeze=False,
         sharex=True
     )
@@ -1107,5 +1107,7 @@ def QQ_PLOT_ALL(params, pred,
 
     plt.tight_layout()
     plt.savefig(save_path, dpi=200)
-    plt.show()
+    plt.close()
+    print(f"✅ QQ plots saved to {save_path}")
+
 
