@@ -9,5 +9,5 @@ Data/Uheld/
 /ENVI Opdatering af uheldsmodel.pptx
 
 # Python cache
-__pycache__/
+Scripts/__pycache__
 *.pyc
