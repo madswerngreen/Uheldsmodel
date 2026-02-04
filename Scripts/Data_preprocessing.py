@@ -23,15 +23,16 @@ print(">>> Processing GMM traffic data...")
 GMM = pd.read_csv(GMM_PATH)
 Categories = pd.read_csv(CATEGORIES_PATH)
 
-# --- Clean TrafTypeID ---
+# --- Category to TrafTypeID map ---
 Categories.loc[Categories['TrafTypeID'] < 4, 'TrafTypeID'] = 1
 Categories.loc[Categories['TrafTypeID'] == 4, 'TrafTypeID'] = 3
 Categories = Categories[['ID', 'TrafTypeID']].rename(columns={'ID': 'CategoryID'})
 
-# --- Merge and aggregate ---
+# --- Merge to get TrafTypeID ---
 GMM = GMM.merge(Categories, on='CategoryID', how='left')
 GMM['AvgSpeed'] *= GMM['TotalTraf']
 
+# --- Calculate weighted averages of speed ---
 print("    Aggregating weighted averages...")
 GMM = (
     GMM.groupby(['LinkID', 'TrafTypeID'])
@@ -59,14 +60,14 @@ LINKS = LINKS[['ID', 'LinkTypeID', 'RoadClassID', 'Draw', 'FreeSpeed',
                'LanesFor', 'LanesBack', 'LaneHCFor', 'LaneHCBack', 
                'Length', 'URBAN', 'Domestic', 'WKT']]
 
-LINKS = LINKS[LINKS['Domestic'] == 'DK']
-LINKS = LINKS[LINKS['LinkTypeID'] < 90]
+LINKS = LINKS[LINKS['Domestic'] == 'DK'] # Only dainish links
+LINKS = LINKS[LINKS['LinkTypeID'] < 90] # Assumption: no traffic incidents occur on ferry links
 LINKS['WKT'] = LINKS['WKT'].apply(wkt.loads)
 LINKS = gpd.GeoDataFrame(LINKS, geometry='WKT', crs='EPSG:25832').rename(columns={'ID': 'LinkID'})
 
 print(f"    Number of Danish links: {len(LINKS)}")
 
-LINKS_SHAPE = LINKS[['LinkID', 'Draw', 'WKT']]
+LINKS_SHAPE = LINKS[['LinkID', 'Draw', 'WKT']] # used later
 
 # Compute lane/geometry info
 LINKS_INFO = gpd.GeoDataFrame(LINKS[['LinkID', 'LinkTypeID', 'RoadClassID', 'Draw', 
@@ -77,44 +78,6 @@ LINKS_INFO['Lanes'] = LINKS['LanesFor'] + LINKS['LanesBack']
 LINKS_INFO['LaneHC'] = LINKS['LaneHCFor'] + LINKS['LaneHCBack']
 LINKS_INFO['Oneway'] = ((LINKS['LanesFor'] > 0) ^ (LINKS['LanesBack'] > 0)).astype(int)
 
-print("    Computing merging/diverging features (only for Draw==2)...")
-
-# Keep start/end points for all
-LINKS_INFO['start_point_geom'] = LINKS_INFO['WKT'].apply(lambda g: Point(g.coords[0]))
-LINKS_INFO['end_point_geom']   = LINKS_INFO['WKT'].apply(lambda g: Point(g.coords[-1]))
-
-# Subset where Draw == 2
-subset = LINKS_INFO[LINKS_INFO['Draw'] == 2].copy()
-
-# --- Compute merging ---
-# A link is merging if ≥2 other links end within tolerance of its start point
-gdf_start = gpd.GeoDataFrame(subset[['LinkID']], geometry=subset['start_point_geom'], crs="EPSG:25832")
-gdf_end   = gpd.GeoDataFrame(LINKS_INFO[['LinkID']], geometry=LINKS_INFO['end_point_geom'], crs="EPSG:25832")
-
-# spatial join: which end points are within tolerance of start points
-join_merge = gpd.sjoin_nearest(
-    gdf_start, gdf_end, how='left', max_distance=0.1, distance_col='dist'
-)
-merge_counts = join_merge.groupby('LinkID_left').size()
-subset['Merging'] = subset['LinkID'].map(lambda x: int(merge_counts.get(x, 0) >= 2))
-
-# --- Compute diverging ---
-# A link is diverging if ≥2 other links start within tolerance of its end point
-gdf_end_subset = gpd.GeoDataFrame(subset[['LinkID']], geometry=subset['end_point_geom'], crs="EPSG:25832")
-gdf_start_all  = gpd.GeoDataFrame(LINKS_INFO[['LinkID']], geometry=LINKS_INFO['start_point_geom'], crs="EPSG:25832")
-
-join_div = gpd.sjoin_nearest(
-    gdf_end_subset, gdf_start_all, how='left', max_distance=0.1, distance_col='dist'
-)
-div_counts = join_div.groupby('LinkID_left').size()
-subset['Diverging'] = subset['LinkID'].map(lambda x: int(div_counts.get(x, 0) >= 2))
-
-# --- Merge results back ---
-LINKS_INFO['Merging'] = 0
-LINKS_INFO['Diverging'] = 0
-LINKS_INFO.loc[LINKS_INFO['Draw'] == 2, 'Merging'] = subset['Merging'].values
-LINKS_INFO.loc[LINKS_INFO['Draw'] == 2, 'Diverging'] = subset['Diverging'].values
-
 
 #==============================================================================
 # ACCIDENT DATA (UHELDS DATA)
@@ -124,8 +87,8 @@ uheld = pd.read_excel('../Data/Uheld/Ulykker 2019-2023.xlsx', sheet_name='Ulykke
 print(f"    Raw accidents loaded: {len(uheld)}")
 
 # Filter
-uheld = uheld[uheld['KRYDS_UHELD'] == 'Nej']
-years = [2022, 2023]
+uheld = uheld[uheld['KRYDS_UHELD'] == 'Nej'] # remove acidents in intersections
+years = [2022, 2023] # data period
 uheld = uheld[uheld['AAR'].isin(years)]
 
 print("    Filtering out weekend accidents...")
