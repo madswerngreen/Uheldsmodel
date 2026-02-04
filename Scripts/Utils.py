@@ -5,7 +5,6 @@ from scipy.optimize import minimize
 from sklearn.model_selection import KFold
 import matplotlib.pyplot as plt
 import os
-#from numpy.linalg import inv
 from tqdm.auto import tqdm
 import statsmodels.api as sm
 import random
@@ -977,7 +976,7 @@ class tests:
     
 
 def qq_plot(rqr_values, title, path):
-    fig = plt.figure(figsize=(6, 6))
+    fig = plt.figure(figsize=(4, 4))
     ax = fig.add_subplot(111)
     sm.qqplot(rqr_values.dropna(), line="45", ax=ax, color="blue", alpha=0.7)
     ax.set_title(title, fontsize=13)
@@ -1071,9 +1070,9 @@ def QQ_PLOT_ALL(params, pred,
     
             # Titles / labels
             if i == 0:
-                ax.set_title(title, fontsize=14)
+                ax.set_title(title, fontsize=16)
             if j == 0:
-                ax.set_ylabel(f"Fold {f}", fontsize=12)
+                ax.set_ylabel(f"Fold {f}", fontsize=16)
     
             ax.grid(alpha=0.3, linestyle=":")
     
@@ -1099,7 +1098,7 @@ def QQ_PLOT_ALL(params, pred,
                     f"{label}: {val}",
                     transform=ax.transAxes,
                     ha="right", va="bottom",
-                    fontsize=8,
+                    fontsize=12,
                     color=color,
                     fontweight=weight,
                 )
