@@ -1,0 +1,6 @@
+param_type,name,value,sigma_post,CI_low,CI_high
+beta,Intercept,-17.299262005775375,,,
+gamma,Intercept,-1.4780021098059053,,,
+delta_slight,Intercept,-0.9353110964221341,,,
+delta_serious,Intercept,-0.34072735166705037,,,
+delta_fatal,Intercept,-2.5937203000076168,,,
