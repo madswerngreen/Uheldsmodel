@@ -62,7 +62,7 @@ def main():
     print("\n===== FINAL CROSS-VALIDATION RESULTS =====")
     print(df_cv.mean(numeric_only=True).round(3))
 
-    print("\nAll results saved to ../Results/JointModel_Reduced")
+    print("\nAll results saved to ../Results/JointModel")
 
     return {
         "cv_metrics": df_cv,
@@ -76,13 +76,13 @@ def fit_and_save_params(modelname = 'JointModel'):
     print("\nFitting model on all data...")
     if modelname == 'JointModel':
         data_obj = Data(path=DATA_PATH)
-        y, y_p, z, X, Z, W, exposure = data_obj.var_extract()
+        y, y_p, z, X, Z, W, exposure, LinkID = data_obj.var_extract()
         feature_names_X = ["Intercept"] + data_obj.FEATURES_X
         feature_names_Z = ["Intercept"] + data_obj.FEATURES_Z
         feature_names_W = ["Intercept"] + data_obj.FEATURES_W
     elif modelname == 'Baseline':
         data_obj = Data(path=DATA_PATH,  FEATURES_X = [], FEATURES_Z = [], FEATURES_W = [])
-        y, y_p, z, X, Z, W, exposure = data_obj.var_extract()
+        y, y_p, z, X, Z, W, exposure, LinkID = data_obj.var_extract()
         feature_names_X = ["Intercept"]
         feature_names_Z = ["Intercept"]
         feature_names_W = ["Intercept"]
